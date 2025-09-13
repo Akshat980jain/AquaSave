@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
+import apiService from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import Header from './Header';
 import StatCard from './StatCard';
@@ -11,59 +12,157 @@ import Overview from './Overview';
 interface SampleData {
   id: string;
   location: string;
-  coordinates: [number, number];
-  metalConcentrations: Record<string, number>;
-  hmpiValue: number;
+  latitude: number;
+  longitude: number;
+  cu_concentration: number;
+  pb_concentration: number;
+  cd_concentration: number;
+  zn_concentration: number;
+  hmpi_value: number;
   status: 'safe' | 'marginal' | 'high';
+  sample_date: string;
+  collected_by: string;
+  notes?: string;
+  additional_data?: {
+    pH?: number;
+    ec?: number;
+    co3?: number;
+    hco3?: number;
+    cl?: number;
+    f?: number;
+    so4?: number;
+    no3?: number;
+    po4?: number;
+    totalHardness?: number;
+    ca?: number;
+    mg?: number;
+    na?: number;
+    k?: number;
+    fe?: number;
+    as?: number;
+    u?: number;
+  };
 }
 
 const Dashboard: React.FC = () => {
   const [samples, setSamples] = useState<SampleData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  // Mock data - In real app, this would come from API/database
-  useEffect(() => {
+  // Mock data for when API is not available
+  const getMockSamples = (): SampleData[] => {
     const mockSamples: SampleData[] = [
       {
         id: '1',
         location: 'Site A - Urban Area',
-        coordinates: [28.6139, 77.2090],
-        metalConcentrations: { Cu: 0.8, Pb: 0.05, Cd: 0.002, Zn: 1.2 },
-        hmpiValue: 45.2,
-        status: 'safe'
+        latitude: 28.6139,
+        longitude: 77.2090,
+        cu_concentration: 0.8,
+        pb_concentration: 0.05,
+        cd_concentration: 0.002,
+        zn_concentration: 1.2,
+        hmpi_value: 45.2,
+        status: 'safe',
+        sample_date: '2024-01-15',
+        collected_by: 'Dr. Sarah Johnson',
+        notes: 'Normal urban pollution levels'
       },
       {
         id: '2',
         location: 'Site B - Industrial Zone',
-        coordinates: [28.7041, 77.1025],
-        metalConcentrations: { Cu: 1.5, Pb: 0.12, Cd: 0.008, Zn: 2.8 },
-        hmpiValue: 78.5,
-        status: 'marginal'
+        latitude: 28.7041,
+        longitude: 77.1025,
+        cu_concentration: 1.5,
+        pb_concentration: 0.12,
+        cd_concentration: 0.008,
+        zn_concentration: 2.8,
+        hmpi_value: 78.5,
+        status: 'marginal',
+        sample_date: '2024-01-16',
+        collected_by: 'Mark Thompson',
+        notes: 'Elevated levels near industrial area'
       },
-      // Add more mock samples...
+      {
+        id: '3',
+        location: 'Site C - Residential Area',
+        latitude: 28.5355,
+        longitude: 77.3910,
+        cu_concentration: 0.3,
+        pb_concentration: 0.02,
+        cd_concentration: 0.001,
+        zn_concentration: 0.8,
+        hmpi_value: 25.1,
+        status: 'safe',
+        sample_date: '2024-01-17',
+        collected_by: 'Dr. Sarah Johnson'
+      },
+      {
+        id: '4',
+        location: 'Site D - Mining Area',
+        latitude: 28.7041,
+        longitude: 77.1025,
+        cu_concentration: 2.8,
+        pb_concentration: 0.25,
+        cd_concentration: 0.015,
+        zn_concentration: 4.2,
+        hmpi_value: 125.3,
+        status: 'high',
+        sample_date: '2024-01-18',
+        collected_by: 'Mark Thompson',
+        notes: 'Critical levels - immediate action required'
+      }
     ];
 
-    // Generate more samples for demonstration - Higher officials see more data
+    // Generate more samples for demonstration
     const sampleCount = user?.role === 'higher_official' ? 18 : 8;
     const additionalSamples = Array.from({ length: sampleCount }, (_, index) => ({
-      id: `${index + 3}`,
-      location: `Site ${String.fromCharCode(67 + index)} - Sample Location`,
-      coordinates: [
-        28.6 + (Math.random() - 0.5) * 0.5,
-        77.2 + (Math.random() - 0.5) * 0.5
-      ] as [number, number],
-      metalConcentrations: {
-        Cu: Math.random() * 2,
-        Pb: Math.random() * 0.2,
-        Cd: Math.random() * 0.01,
-        Zn: Math.random() * 3
-      },
-      hmpiValue: Math.random() * 150,
-      status: Math.random() > 0.8 ? 'marginal' : 'safe' as 'safe' | 'marginal' | 'high'
+      id: `${index + 5}`,
+      location: `Site ${String.fromCharCode(69 + index)} - Sample Location`,
+      latitude: 28.6 + (Math.random() - 0.5) * 0.5,
+      longitude: 77.2 + (Math.random() - 0.5) * 0.5,
+      cu_concentration: Math.random() * 2,
+      pb_concentration: Math.random() * 0.2,
+      cd_concentration: Math.random() * 0.01,
+      zn_concentration: Math.random() * 3,
+      hmpi_value: Math.random() * 150,
+      status: Math.random() > 0.8 ? 'marginal' : Math.random() > 0.9 ? 'high' : 'safe' as 'safe' | 'marginal' | 'high',
+      sample_date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      collected_by: Math.random() > 0.5 ? 'Dr. Sarah Johnson' : 'Mark Thompson',
+      notes: Math.random() > 0.7 ? 'Additional monitoring required' : undefined
     }));
 
-    setSamples([...mockSamples, ...additionalSamples]);
-  }, [user?.role]);
+    return [...mockSamples, ...additionalSamples];
+  };
+
+  useEffect(() => {
+    fetchSamples();
+  }, []);
+
+  const fetchSamples = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Try to fetch from API first
+      const response = await apiService.getSamples({
+        limit: user?.role === 'higher_official' ? 50 : 10
+      });
+      
+      if (response.success && response.data) {
+        setSamples(response.data.samples);
+      } else {
+        // Fallback to mock data
+        setSamples(getMockSamples());
+      }
+    } catch (err) {
+      // If API fails, use mock data
+      console.warn('API not available, using mock data:', err);
+      setSamples(getMockSamples());
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const stats = {
     total: samples.length,
@@ -75,6 +174,22 @@ const Dashboard: React.FC = () => {
   const safePercentage = stats.total > 0 ? Math.round((stats.safe / stats.total) * 100) : 0;
   const marginalPercentage = stats.total > 0 ? Math.round((stats.marginal / stats.total) * 100) : 0;
   const highPercentage = stats.total > 0 ? Math.round((stats.high / stats.total) * 100) : 0;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-transparent">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
+              <p className="text-slate-300">Loading dashboard data...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
 
   return (

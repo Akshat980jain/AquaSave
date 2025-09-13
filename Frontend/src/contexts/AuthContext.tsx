@@ -1,63 +1,79 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import apiService from '../services/api';
 import { User, AuthContextType } from '../types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demonstration
-const mockUsers: (User & { password: string })[] = [
-  {
-    id: '1',
-    username: 'higher_admin',
-    password: 'admin123',
-    role: 'higher_official',
-    name: 'Dr. Sarah Johnson',
-    email: 'sarah.johnson@env.gov'
-  },
-  {
-    id: '2',
-    username: 'lower_admin',
-    password: 'user123',
-    role: 'lower_official',
-    name: 'Mark Thompson',
-    email: 'mark.thompson@env.gov'
-  }
-];
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored user session
-    const storedUser = localStorage.getItem('hmpi_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    // Check for stored auth token and validate
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      validateToken();
+    } else {
+      setIsLoading(false);
     }
   }, []);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
-    const foundUser = mockUsers.find(u => u.username === username && u.password === password);
-    
-    if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('hmpi_user', JSON.stringify(userWithoutPassword));
-      return true;
+  const validateToken = async () => {
+    try {
+      const response = await apiService.getCurrentUser();
+      if (response.success && response.data) {
+        setUser(response.data);
+      } else {
+        // Invalid token, clear it
+        apiService.logout();
+      }
+    } catch (error) {
+      console.error('Token validation failed:', error);
+      apiService.logout();
+    } finally {
+      setIsLoading(false);
     }
-    
-    return false;
+  };
+
+  const login = async (username: string, password: string): Promise<boolean> => {
+    try {
+      const response = await apiService.login(username, password);
+      
+      if (response.success && response.data) {
+        setUser(response.data.user);
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
+    }
   };
 
   const logout = () => {
+    apiService.logout();
     setUser(null);
-    localStorage.removeItem('hmpi_user');
   };
 
   const value: AuthContextType = {
     user,
     login,
     logout,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    isLoading
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
+          <p className="text-slate-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={value}>
