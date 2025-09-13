@@ -138,7 +138,6 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     fetchSamples();
   }, []);
-
   const fetchSamples = async () => {
     try {
       setLoading(true);
@@ -190,7 +189,6 @@ const Dashboard: React.FC = () => {
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-transparent">

@@ -52,4 +52,8 @@ export interface SampleFilters {
   dateTo?: string;
   hmpiMin?: number;
   hmpiMax?: number;
+  minHmpi?: number;
+  maxHmpi?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }

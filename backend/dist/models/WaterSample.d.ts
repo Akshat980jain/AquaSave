@@ -12,6 +12,25 @@ export interface IWaterSample extends Document {
     hmpi_value: number;
     status: 'safe' | 'marginal' | 'high';
     notes?: string;
+    additional_data?: {
+        pH?: number;
+        ec?: number;
+        co3?: number;
+        hco3?: number;
+        cl?: number;
+        f?: number;
+        so4?: number;
+        no3?: number;
+        po4?: number;
+        totalHardness?: number;
+        ca?: number;
+        mg?: number;
+        na?: number;
+        k?: number;
+        fe?: number;
+        as?: number;
+        u?: number;
+    };
     created_at: Date;
     updated_at: Date;
 }

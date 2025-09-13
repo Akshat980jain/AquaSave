@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
-export declare class AuthController {
-    static login(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
-    static me(req: any, res: Response): Promise<Response<any, Record<string, any>>>;
-}
+import { AuthRequest } from '../middleware/auth';
+export declare const login: (req: Request, res: Response) => Promise<Response<any, Record<string, any>>>;
+export declare const me: (req: AuthRequest, res: Response) => Promise<Response<any, Record<string, any>>>;
 //# sourceMappingURL=authController.d.ts.map

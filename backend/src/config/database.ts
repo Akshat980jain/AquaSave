@@ -154,5 +154,3 @@ async function generateSampleData() {
 
   return samples;
 }
-
-export default db;

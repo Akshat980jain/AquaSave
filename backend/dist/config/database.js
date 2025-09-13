@@ -7,6 +7,8 @@ exports.db = exports.connectDatabase = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const User_1 = require("../models/User");
 const WaterSample_1 = require("../models/WaterSample");
+const csvParser_1 = require("../services/csvParser");
+const path_1 = __importDefault(require("path"));
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/aquasafe';
 const connectDatabase = async () => {
     try {
@@ -62,7 +64,24 @@ async function insertSampleData() {
     try {
         const sampleCount = await WaterSample_1.WaterSample.countDocuments();
         if (sampleCount === 0) {
-            const samples = generateSampleData();
+            const csvPath = path_1.default.join(__dirname, '../../../../Frontend/filtered_output.csv');
+            let samples;
+            try {
+                const csvData = csvParser_1.CSVParser.parseCSVData(csvPath);
+                if (csvData.length > 0) {
+                    const users = await User_1.User.find({}, '_id');
+                    const userIds = users.map(user => user._id.toString());
+                    samples = csvData.slice(0, 100).map(csvSample => csvParser_1.CSVParser.convertToWaterSample(csvSample, userIds[Math.floor(Math.random() * userIds.length)]));
+                    console.log(`Loaded ${samples.length} samples from CSV data`);
+                }
+                else {
+                    throw new Error('No CSV data found');
+                }
+            }
+            catch (csvError) {
+                console.log('CSV data not available, using generated sample data');
+                samples = await generateSampleData();
+            }
             await WaterSample_1.WaterSample.insertMany(samples);
             console.log('Sample data inserted successfully');
         }
@@ -119,5 +138,4 @@ async function generateSampleData() {
     }
     return samples;
 }
-exports.default = exports.db;
 //# sourceMappingURL=database.js.map

@@ -85,6 +85,10 @@ const WaterSampleSchema = new mongoose_1.Schema({
     notes: {
         type: String,
         trim: true
+    },
+    additional_data: {
+        type: mongoose_1.Schema.Types.Mixed,
+        default: {}
     }
 }, {
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }

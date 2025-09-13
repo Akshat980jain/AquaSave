@@ -8,8 +8,8 @@ export declare class SampleService {
         total: number;
     }>;
     static findById(id: string): Promise<IWaterSample | null>;
-    static create(sampleData: Partial<IWaterSample>, userId: string): Promise<IWaterSample>;
-    static update(id: string, updateData: Partial<IWaterSample>): Promise<IWaterSample | null>;
+    static create(sampleData: any, userId: string): Promise<IWaterSample>;
+    static update(id: string, updateData: any, userId: string): Promise<IWaterSample | null>;
     static delete(id: string): Promise<boolean>;
     static getStatistics(userRole?: string): Promise<any>;
 }

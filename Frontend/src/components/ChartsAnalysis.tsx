@@ -28,26 +28,26 @@ interface SampleData {
 	status: 'safe' | 'marginal' | 'high';
 	sample_date: string;
 	collected_by: string;
-	notes?: string;
-	additional_data?: {
-		pH?: number;
-		ec?: number;
-		co3?: number;
-		hco3?: number;
-		cl?: number;
-		f?: number;
-		so4?: number;
-		no3?: number;
-		po4?: number;
-		totalHardness?: number;
-		ca?: number;
-		mg?: number;
-		na?: number;
-		k?: number;
-		fe?: number;
-		as?: number;
-		u?: number;
-	};
+  notes?: string;
+  additional_data?: {
+    pH?: number;
+    ec?: number;
+    co3?: number;
+    hco3?: number;
+    cl?: number;
+    f?: number;
+    so4?: number;
+    no3?: number;
+    po4?: number;
+    totalHardness?: number;
+    ca?: number;
+    mg?: number;
+    na?: number;
+    k?: number;
+    fe?: number;
+    as?: number;
+    u?: number;
+  };
 }
 
 interface ChartsAnalysisProps {
