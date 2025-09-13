@@ -18,10 +18,17 @@ import {
 interface SampleData {
 	id: string;
 	location: string;
-	coordinates: [number, number];
-	metalConcentrations: Record<string, number>;
-	hmpiValue: number;
+	latitude: number;
+	longitude: number;
+	cu_concentration: number;
+	pb_concentration: number;
+	cd_concentration: number;
+	zn_concentration: number;
+	hmpi_value: number;
 	status: 'safe' | 'marginal' | 'high';
+	sample_date: string;
+	collected_by: string;
+	notes?: string;
 }
 
 interface ChartsAnalysisProps {
@@ -50,10 +57,10 @@ const ChartsAnalysis: React.FC<ChartsAnalysisProps> = ({ samples }) => {
 		if (samples.length === 0) return { Cu: 0, Pb: 0, Cd: 0, Zn: 0 };
 		const sum = samples.reduce(
 			(acc, s) => {
-				acc.Cu += s.metalConcentrations.Cu || 0;
-				acc.Pb += s.metalConcentrations.Pb || 0;
-				acc.Cd += s.metalConcentrations.Cd || 0;
-				acc.Zn += s.metalConcentrations.Zn || 0;
+				acc.Cu += s.cu_concentration || 0;
+				acc.Pb += s.pb_concentration || 0;
+				acc.Cd += s.cd_concentration || 0;
+				acc.Zn += s.zn_concentration || 0;
 				return acc;
 			},
 			{ Cu: 0, Pb: 0, Cd: 0, Zn: 0 }
@@ -73,7 +80,7 @@ const ChartsAnalysis: React.FC<ChartsAnalysisProps> = ({ samples }) => {
 		samples.forEach((s) => {
 			const bucket = `Batch ${((parseInt(s.id, 10) || 0) % 6) + 1}`;
 			if (!buckets[bucket]) buckets[bucket] = { name: bucket, HMPI: 0, Safe: 0, Risk: 0 };
-			buckets[bucket].HMPI += s.hmpiValue;
+			buckets[bucket].HMPI += s.hmpi_value;
 			buckets[bucket].Safe += s.status === 'safe' ? 1 : 0;
 			buckets[bucket].Risk += s.status !== 'safe' ? 1 : 0;
 		});

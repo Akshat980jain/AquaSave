@@ -4,10 +4,17 @@ import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-rea
 interface SampleData {
   id: string;
   location: string;
-  coordinates: [number, number];
-  metalConcentrations: Record<string, number>;
-  hmpiValue: number;
+  latitude: number;
+  longitude: number;
+  cu_concentration: number;
+  pb_concentration: number;
+  cd_concentration: number;
+  zn_concentration: number;
+  hmpi_value: number;
   status: 'safe' | 'marginal' | 'high';
+  sample_date: string;
+  collected_by: string;
+  notes?: string;
 }
 
 interface OverviewProps {
@@ -16,17 +23,17 @@ interface OverviewProps {
 
 const Overview: React.FC<OverviewProps> = ({ samples }) => {
   const averageHMPI = samples.length > 0 
-    ? samples.reduce((sum, sample) => sum + sample.hmpiValue, 0) / samples.length 
+    ? samples.reduce((sum, sample) => sum + sample.hmpi_value, 0) / samples.length 
     : 0;
 
   const recentSamples = samples.slice(0, 10);
   const criticalSamples = samples.filter(sample => sample.status === 'high' || sample.status === 'marginal');
 
   const metalAverages = {
-    Cu: samples.length > 0 ? samples.reduce((sum, s) => sum + (s.metalConcentrations.Cu || 0), 0) / samples.length : 0,
-    Pb: samples.length > 0 ? samples.reduce((sum, s) => sum + (s.metalConcentrations.Pb || 0), 0) / samples.length : 0,
-    Cd: samples.length > 0 ? samples.reduce((sum, s) => sum + (s.metalConcentrations.Cd || 0), 0) / samples.length : 0,
-    Zn: samples.length > 0 ? samples.reduce((sum, s) => sum + (s.metalConcentrations.Zn || 0), 0) / samples.length : 0,
+    Cu: samples.length > 0 ? samples.reduce((sum, s) => sum + (s.cu_concentration || 0), 0) / samples.length : 0,
+    Pb: samples.length > 0 ? samples.reduce((sum, s) => sum + (s.pb_concentration || 0), 0) / samples.length : 0,
+    Cd: samples.length > 0 ? samples.reduce((sum, s) => sum + (s.cd_concentration || 0), 0) / samples.length : 0,
+    Zn: samples.length > 0 ? samples.reduce((sum, s) => sum + (s.zn_concentration || 0), 0) / samples.length : 0,
   };
 
   return (
@@ -88,7 +95,7 @@ const Overview: React.FC<OverviewProps> = ({ samples }) => {
                 <div key={sample.id} className="flex items-center justify-between p-3 bg-slate-800/60 border border-slate-700 rounded-lg">
                   <div>
                     <p className="font-medium text-slate-100">{sample.location}</p>
-                    <p className="text-sm text-slate-300">HMPI: {sample.hmpiValue.toFixed(1)}</p>
+                    <p className="text-sm text-slate-300">HMPI: {sample.hmpi_value.toFixed(1)}</p>
                   </div>
                   <div className={`px-3 py-1 rounded-full text-xs font-medium ${
                     sample.status === 'safe' 
@@ -118,7 +125,7 @@ const Overview: React.FC<OverviewProps> = ({ samples }) => {
                     }`} />
                     <div>
                       <p className="font-medium text-slate-100">{sample.location}</p>
-                      <p className="text-sm text-slate-300">HMPI: {sample.hmpiValue.toFixed(1)} - Requires attention</p>
+                      <p className="text-sm text-slate-300">HMPI: {sample.hmpi_value.toFixed(1)} - Requires attention</p>
                     </div>
                   </div>
                 ))}

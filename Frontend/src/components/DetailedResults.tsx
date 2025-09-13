@@ -4,10 +4,17 @@ import { Search, Download, Filter, Eye } from 'lucide-react';
 interface SampleData {
   id: string;
   location: string;
-  coordinates: [number, number];
-  metalConcentrations: Record<string, number>;
-  hmpiValue: number;
+  latitude: number;
+  longitude: number;
+  cu_concentration: number;
+  pb_concentration: number;
+  cd_concentration: number;
+  zn_concentration: number;
+  hmpi_value: number;
   status: 'safe' | 'marginal' | 'high';
+  sample_date: string;
+  collected_by: string;
+  notes?: string;
 }
 
 interface DetailedResultsProps {
@@ -89,16 +96,16 @@ const DetailedResults: React.FC<DetailedResultsProps> = ({ samples }) => {
               {filteredSamples.map((sample) => (
                 <tr key={sample.id} className="border-b border-slate-800 hover:bg-slate-900/40">
                   <td className="py-3 px-4">{sample.location}</td>
-                  <td className="py-3 px-4">{sample.hmpiValue.toFixed(1)}</td>
+                  <td className="py-3 px-4">{sample.hmpi_value.toFixed(1)}</td>
                   <td className="py-3 px-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium border capitalize ${getStatusColor(sample.status)}`}>
                       {sample.status}
                     </span>
                   </td>
-                  <td className="py-3 px-4">{sample.metalConcentrations.Cu?.toFixed(3) || 'N/A'}</td>
-                  <td className="py-3 px-4">{sample.metalConcentrations.Pb?.toFixed(3) || 'N/A'}</td>
-                  <td className="py-3 px-4">{sample.metalConcentrations.Cd?.toFixed(4) || 'N/A'}</td>
-                  <td className="py-3 px-4">{sample.metalConcentrations.Zn?.toFixed(3) || 'N/A'}</td>
+                  <td className="py-3 px-4">{sample.cu_concentration?.toFixed(3) || 'N/A'}</td>
+                  <td className="py-3 px-4">{sample.pb_concentration?.toFixed(3) || 'N/A'}</td>
+                  <td className="py-3 px-4">{sample.cd_concentration?.toFixed(4) || 'N/A'}</td>
+                  <td className="py-3 px-4">{sample.zn_concentration?.toFixed(3) || 'N/A'}</td>
                   <td className="py-3 px-4">
                     <button
                       onClick={() => setSelectedSample(sample)}
@@ -133,7 +140,7 @@ const DetailedResults: React.FC<DetailedResultsProps> = ({ samples }) => {
                 
                 <div>
                   <label className="text-sm font-medium text-slate-300">HMPI Value</label>
-                  <p className="text-slate-100 text-xl font-bold">{selectedSample.hmpiValue.toFixed(1)}</p>
+                  <p className="text-slate-100 text-xl font-bold">{selectedSample.hmpi_value.toFixed(1)}</p>
                 </div>
                 
                 <div>
@@ -148,19 +155,19 @@ const DetailedResults: React.FC<DetailedResultsProps> = ({ samples }) => {
                   <div className="grid grid-cols-2 gap-2 mt-1">
                     <div className="bg-slate-800 p-2 rounded border border-slate-700">
                       <div className="text-xs text-slate-300">Copper (Cu)</div>
-                      <div className="font-medium">{selectedSample.metalConcentrations.Cu?.toFixed(3)} mg/L</div>
+                      <div className="font-medium">{selectedSample.cu_concentration?.toFixed(3)} mg/L</div>
                     </div>
                     <div className="bg-slate-800 p-2 rounded border border-slate-700">
                       <div className="text-xs text-slate-300">Lead (Pb)</div>
-                      <div className="font-medium">{selectedSample.metalConcentrations.Pb?.toFixed(3)} mg/L</div>
+                      <div className="font-medium">{selectedSample.pb_concentration?.toFixed(3)} mg/L</div>
                     </div>
                     <div className="bg-slate-800 p-2 rounded border border-slate-700">
                       <div className="text-xs text-slate-300">Cadmium (Cd)</div>
-                      <div className="font-medium">{selectedSample.metalConcentrations.Cd?.toFixed(4)} mg/L</div>
+                      <div className="font-medium">{selectedSample.cd_concentration?.toFixed(4)} mg/L</div>
                     </div>
                     <div className="bg-slate-800 p-2 rounded border border-slate-700">
                       <div className="text-xs text-slate-300">Zinc (Zn)</div>
-                      <div className="font-medium">{selectedSample.metalConcentrations.Zn?.toFixed(3)} mg/L</div>
+                      <div className="font-medium">{selectedSample.zn_concentration?.toFixed(3)} mg/L</div>
                     </div>
                   </div>
                 </div>
